@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { consultationsApi } from '../../api/consultations'
 import type { ConsultationResponse } from '../../types'
 import toast from 'react-hot-toast'
-import { FileText, Calendar, Clock, User, Edit2 } from 'lucide-react'
+import { FileText, Calendar, Clock, User, Edit2, Phone, Mail } from 'lucide-react'
 
 interface UpdateForm {
     status: number
@@ -78,12 +78,28 @@ export const NutritionistConsultations = () => {
                                         <User size={16} className="text-emerald-600" />
                                         {c.clientName}
                                     </div>
+                                    <div className="flex items-center gap-3">
+                                        {c.clientPhone && (
+                                            <a href={`tel:${c.clientPhone}`}
+                                                className="flex items-center gap-1 text-xs text-gray-500 hover:text-emerald-600 transition">
+                                                <Phone size={11} />
+                                                {c.clientPhone}
+                                            </a>
+                                        )}
+                                        {c.clientEmail && (
+                                            <a href={`mailto:${c.clientEmail}`}
+                                                className="flex items-center gap-1 text-xs text-gray-500 hover:text-emerald-600 transition">
+                                                <Mail size={11} />
+                                                {c.clientEmail}
+                                            </a>
+                                        )}
+                                    </div>
                                     <div className="flex items-center gap-4 text-gray-500 text-sm">
                                         <span className="flex items-center gap-1">
                                             <Calendar size={13} />{formatDate(c.startTime)}
                                         </span>
                                         <span className="flex items-center gap-1">
-                                            <Clock size={13} />{formatTime(c.startTime)}
+                                            <Clock size={13} />{formatTime(c.startTime)} - {formatTime(c.endTime)}
                                         </span>
                                     </div>
                                 </div>

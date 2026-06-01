@@ -26,7 +26,9 @@ export interface BookingResponse {
   endTime: string
   nutritionistName: string
   clientName: string
-  status: 0 | 1 | 2  // 0=Confirmed, 1=Cancelled, 2=Completed
+  clientPhone: string
+  clientEmail: string
+  status: 0 | 1 | 2  // 0 - Confirmed, 1 - Cancelled, 2 - Completed 
   statusName: string
   createdAt: string
 }
@@ -35,6 +37,8 @@ export interface ConsultationResponse {
   id: string
   bookingId: string
   clientName: string
+  clientPhone: string
+  clientEmail: string
   nutritionistName: string
   startTime: string
   endTime: string

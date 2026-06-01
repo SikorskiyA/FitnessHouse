@@ -1,8 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from './components/layout/ProtectedRoute'
 import { DashboardRedirect } from './components/layout/DashboardRedirect'
-
-// Страницы — создадим их на следующих шагах
 import { LoginPage } from './pages/auth/LoginPage'
 import { RegisterPage } from './pages/auth/RegisterPage'
 import { ClientDashboard } from './pages/client/ClientDashboard'

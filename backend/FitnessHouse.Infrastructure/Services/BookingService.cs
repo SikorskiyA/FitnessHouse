@@ -16,7 +16,10 @@ public class BookingService : IBookingService
         _context = context;
     }
 
-    public async Task<BookingResponse> CreateBookingAsync(Guid clientId, CreateBookingRequest request)
+    public async Task<BookingResponse> CreateBookingAsync(
+        Guid clientId,
+        CreateBookingRequest request
+    )
     {
         // Используем транзакцию — если что-то пойдёт не так, все изменения откатятся
         await using var transaction = await _context.Database.BeginTransactionAsync();
@@ -25,8 +28,8 @@ public class BookingService : IBookingService
         {
             // Загружаем слот с блокировкой — никто другой не сможет его изменить
             // пока мы не завершим транзакцию
-            var slot = await _context.Slots
-                .Include(s => s.Nutritionist)
+            var slot = await _context
+                .Slots.Include(s => s.Nutritionist)
                     .ThenInclude(n => n.User)
                 .FirstOrDefaultAsync(s => s.Id == request.SlotId);
 
@@ -40,13 +43,14 @@ public class BookingService : IBookingService
                 throw new InvalidOperationException("Нельзя записаться на прошедшее время");
 
             // Проверяем нет ли у клиента уже записи на это время
-            var hasConflict = await _context.Bookings
-                .Include(b => b.Slot)
+            var hasConflict = await _context
+                .Bookings.Include(b => b.Slot)
                 .AnyAsync(b =>
-                    b.ClientId == clientId &&
-                    b.Status == BookingStatus.Confirmed &&
-                    b.Slot.StartTime < slot.EndTime &&
-                    b.Slot.EndTime > slot.StartTime);
+                    b.ClientId == clientId
+                    && b.Status == BookingStatus.Confirmed
+                    && b.Slot.StartTime < slot.EndTime
+                    && b.Slot.EndTime > slot.StartTime
+                );
 
             if (hasConflict)
                 throw new InvalidOperationException("У вас уже есть запись на это время");
@@ -61,7 +65,7 @@ public class BookingService : IBookingService
                 ClientId = clientId,
                 SlotId = slot.Id,
                 Status = BookingStatus.Confirmed,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
             };
 
             _context.Bookings.Add(booking);
@@ -73,7 +77,7 @@ public class BookingService : IBookingService
                 BookingId = booking.Id,
                 ClientId = clientId,
                 NutritionistId = slot.NutritionistId,
-                Status = ConsultationStatus.Scheduled
+                Status = ConsultationStatus.Scheduled,
             };
 
             _context.Consultations.Add(consultation);
@@ -90,12 +94,13 @@ public class BookingService : IBookingService
                 // Оптимистичная блокировка сработала — слот уже занят
                 await transaction.RollbackAsync();
                 throw new InvalidOperationException(
-                    "Этот слот только что забронировал другой пользователь. Пожалуйста, выберите другое время.");
+                    "Этот слот только что забронировал другой пользователь. Пожалуйста, выберите другое время."
+                );
             }
 
             // Подгружаем клиента для ответа
-            var client = await _context.Clients
-                .Include(c => c.User)
+            var client = await _context
+                .Clients.Include(c => c.User)
                 .FirstOrDefaultAsync(c => c.Id == clientId);
 
             return MapToResponse(booking, slot, client);
@@ -107,10 +112,14 @@ public class BookingService : IBookingService
         }
     }
 
-    public async Task<bool> CancelBookingAsync(Guid bookingId, Guid clientId, CancelBookingRequest request)
+    public async Task<bool> CancelBookingAsync(
+        Guid bookingId,
+        Guid clientId,
+        CancelBookingRequest request
+    )
     {
-        var booking = await _context.Bookings
-            .Include(b => b.Slot)
+        var booking = await _context
+            .Bookings.Include(b => b.Slot)
             .Include(b => b.Consultation)
             .FirstOrDefaultAsync(b => b.Id == bookingId && b.ClientId == clientId);
 
@@ -124,7 +133,8 @@ public class BookingService : IBookingService
         var hoursUntilConsultation = (booking.Slot.StartTime - DateTime.UtcNow).TotalHours;
         if (hoursUntilConsultation < 12)
             throw new InvalidOperationException(
-                "Отмена возможна не позже чем за 12 часов до начала консультации");
+                "Отмена возможна не позже чем за 12 часов до начала консультации"
+            );
 
         // Отменяем запись
         booking.Status = BookingStatus.Cancelled;
@@ -144,8 +154,8 @@ public class BookingService : IBookingService
 
     public async Task<IEnumerable<BookingResponse>> GetClientBookingsAsync(Guid clientId)
     {
-        var bookings = await _context.Bookings
-            .Include(b => b.Slot)
+        var bookings = await _context
+            .Bookings.Include(b => b.Slot)
                 .ThenInclude(s => s.Nutritionist)
                     .ThenInclude(n => n.User)
             .Include(b => b.Client)
@@ -157,10 +167,12 @@ public class BookingService : IBookingService
         return bookings.Select(b => MapToResponse(b, b.Slot, b.Client));
     }
 
-    public async Task<IEnumerable<BookingResponse>> GetNutritionistBookingsAsync(Guid nutritionistId)
+    public async Task<IEnumerable<BookingResponse>> GetNutritionistBookingsAsync(
+        Guid nutritionistId
+    )
     {
-        var bookings = await _context.Bookings
-            .Include(b => b.Slot)
+        var bookings = await _context
+            .Bookings.Include(b => b.Slot)
                 .ThenInclude(s => s.Nutritionist)
                     .ThenInclude(n => n.User)
             .Include(b => b.Client)
@@ -172,22 +184,25 @@ public class BookingService : IBookingService
         return bookings.Select(b => MapToResponse(b, b.Slot, b.Client));
     }
 
-    private static BookingResponse MapToResponse(Booking booking, Slot slot, Client? client) => new()
-    {
-        Id = booking.Id,
-        SlotId = slot.Id,
-        StartTime = slot.StartTime,
-        EndTime = slot.EndTime,
-        NutritionistName = slot.Nutritionist?.User?.FullName ?? string.Empty,
-        ClientName = client?.User?.FullName ?? string.Empty,
-        Status = booking.Status,
-        StatusName = booking.Status switch
+    private static BookingResponse MapToResponse(Booking booking, Slot slot, Client? client) =>
+        new()
         {
-            BookingStatus.Confirmed  => "Подтверждена",
-            BookingStatus.Cancelled  => "Отменена",
-            BookingStatus.Completed  => "Завершена",
-            _                        => "Неизвестно"
-        },
-        CreatedAt = booking.CreatedAt
-    };
+            Id = booking.Id,
+            SlotId = slot.Id,
+            StartTime = slot.StartTime,
+            EndTime = slot.EndTime,
+            NutritionistName = slot.Nutritionist?.User?.FullName ?? string.Empty,
+            ClientName = client?.User?.FullName ?? string.Empty,
+            ClientPhone = client?.User?.PhoneNumber ?? string.Empty,
+            ClientEmail = client?.User?.Email ?? string.Empty,
+            Status = booking.Status,
+            StatusName = booking.Status switch
+            {
+                BookingStatus.Confirmed => "Подтверждена",
+                BookingStatus.Cancelled => "Отменена",
+                BookingStatus.Completed => "Завершена",
+                _ => "Неизвестно",
+            },
+            CreatedAt = booking.CreatedAt,
+        };
 }

@@ -17,11 +17,17 @@ export const ClientSchedule = () => {
   const [timeFrom, setTimeFrom] = useState('')
   const [timeTo, setTimeTo] = useState('')
 
-  // Фильтр по нутрициологу — автокомплит
+  // Фильтр по нутрициологу - автокомплит
   const [nutritionistSearch, setNutritionistSearch] = useState('')
   const [selectedNutritionistId, setSelectedNutritionistId] = useState<string | null>(null)
   const [showDropdown, setShowDropdown] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const [successBooking, setSuccessBooking] = useState<{
+    nutritionistName: string
+    startTime: string
+    endTime: string
+  } | null>(null)
 
   // Закрываем дропдаун при клике вне него
   useEffect(() => {
@@ -54,10 +60,15 @@ export const ClientSchedule = () => {
     )
   }, [nutritionists, nutritionistSearch])
 
+  // Обнови bookMutation
   const bookMutation = useMutation({
     mutationFn: (slotId: string) => bookingsApi.create(slotId),
     onSuccess: () => {
-      toast.success('Вы успешно записались на консультацию!')
+      setSuccessBooking({
+        nutritionistName: selectedSlot!.nutritionistName,
+        startTime: selectedSlot!.startTime,
+        endTime: selectedSlot!.endTime,
+      })
       queryClient.invalidateQueries({ queryKey: ['slots'] })
       queryClient.invalidateQueries({ queryKey: ['bookings'] })
       setSelectedSlot(null)
@@ -152,7 +163,7 @@ export const ClientSchedule = () => {
       {/* Блок фильтров */}
       <div className="bg-white rounded-2xl p-4 shadow-sm mb-6 space-y-4">
 
-        {/* Фильтр по нутрициологу — автокомплит */}
+        {/* Фильтр по нутрициологу - автокомплит */}
         <div ref={dropdownRef} className="relative">
           <label className="block text-xs font-medium text-gray-500 mb-1">Нутрициолог</label>
           <div className="relative">
@@ -289,7 +300,7 @@ export const ClientSchedule = () => {
                     <div className="flex items-center gap-2 text-emerald-600 mb-2">
                       <Clock size={16} />
                       <span className="font-semibold">
-                        {formatTime(slot.startTime)} — {formatTime(slot.endTime)}
+                        {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-500 text-sm">
@@ -320,7 +331,7 @@ export const ClientSchedule = () => {
               </div>
               <div className="flex items-center gap-2 text-gray-700">
                 <Clock size={16} className="text-emerald-600" />
-                <span>{formatTime(selectedSlot.startTime)} — {formatTime(selectedSlot.endTime)}</span>
+                <span>{formatTime(selectedSlot.startTime)} - {formatTime(selectedSlot.endTime)}</span>
               </div>
             </div>
             <div className="flex gap-3">
@@ -336,6 +347,74 @@ export const ClientSchedule = () => {
                 className="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition disabled:opacity-50"
               >
                 {bookMutation.isPending ? 'Запись...' : 'Записаться'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+      )}
+      {/* Модальное окно успешной записи - ФТ-06 */}
+      {successBooking && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md text-center">
+            {/* Иконка успеха */}
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+
+            <h3 className="text-xl font-bold text-gray-900 mb-1">Запись подтверждена!</h3>
+            <p className="text-gray-500 text-sm mb-6">Вы успешно записались на консультацию</p>
+
+            {/* Детали записи */}
+            <div className="bg-emerald-50 rounded-xl p-4 text-left space-y-3 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <User size={16} className="text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Нутрициолог</p>
+                  <p className="font-medium text-gray-900">{successBooking.nutritionistName}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Calendar size={16} className="text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Дата</p>
+                  <p className="font-medium text-gray-900">{formatDate(successBooking.startTime)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Clock size={16} className="text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Время</p>
+                  <p className="font-medium text-gray-900">
+                    {formatTime(successBooking.startTime)} - {formatTime(successBooking.endTime)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setSuccessBooking(null)}
+                className="flex-1 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition"
+              >
+                Закрыть
+              </button>
+              <button
+                onClick={() => {
+                  setSuccessBooking(null)
+                  window.location.href = '/client/bookings'
+                }}
+                className="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition"
+              >
+                Мои записи
               </button>
             </div>
           </div>

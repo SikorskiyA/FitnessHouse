@@ -107,7 +107,7 @@ export const AdminStats = () => {
 
           {stats && (
             <p className="text-sm text-gray-400 mt-3 text-right">
-              Период: {new Date(stats.periodFrom).toLocaleDateString('ru-RU')} — {new Date(stats.periodTo).toLocaleDateString('ru-RU')}
+              Период: {new Date(stats.periodFrom).toLocaleDateString('ru-RU')} - {new Date(stats.periodTo).toLocaleDateString('ru-RU')}
             </p>
           )}
         </>
