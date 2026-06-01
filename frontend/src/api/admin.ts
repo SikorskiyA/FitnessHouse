@@ -1,5 +1,5 @@
 import { api } from './client'
-import { StatsResponse, UserListResponse } from '../types'
+import type { StatsResponse, UserListResponse } from '../types'
 
 export const adminApi = {
   getStats: (from?: string, to?: string) =>

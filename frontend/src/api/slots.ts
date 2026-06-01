@@ -1,5 +1,5 @@
 import { api } from './client'
-import { SlotResponse } from '../types'
+import type { SlotResponse } from '../types'
 
 export const slotsApi = {
   getAvailable: (nutritionistId?: string) =>

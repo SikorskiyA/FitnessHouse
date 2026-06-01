@@ -1,5 +1,5 @@
 import { api } from './client'
-import { BookingResponse } from '../types'
+import type { BookingResponse } from '../types'
 
 export const bookingsApi = {
   create: (slotId: string) =>
