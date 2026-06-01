@@ -24,15 +24,13 @@ export const ProfilePage = () => {
     const { user } = useAuthStore()
     const [tab, setTab] = useState<'profile' | 'password'>('profile')
 
-    const queryClient = useQueryClient() // ← добавить в начало компонента
+    const queryClient = useQueryClient()
 
-    // Заменить useQuery на такой — refetchOnMount: 'always' означает
-    // что при каждом заходе на страницу данные будут загружаться заново из БД
     const { data: profile, isLoading } = useQuery({
         queryKey: ['profile'],
         queryFn: () => profileApi.get().then(r => r.data),
-        refetchOnMount: 'always',   // ← добавить
-        staleTime: 0,               // ← добавить — данные всегда считаются устаревшими
+        refetchOnMount: 'always',
+        staleTime: 0,
     })
 
     const { register, handleSubmit, reset, formState: { errors } } = useForm<ProfileForm>()

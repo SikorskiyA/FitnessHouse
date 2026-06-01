@@ -7,6 +7,8 @@ public class ConsultationResponse
     public Guid Id { get; set; }
     public Guid BookingId { get; set; }
     public string ClientName { get; set; } = string.Empty;
+    public string ClientPhone { get; set; } = string.Empty;
+    public string ClientEmail { get; set; } = string.Empty;
     public string NutritionistName { get; set; } = string.Empty;
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }

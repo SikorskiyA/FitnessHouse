@@ -10,6 +10,8 @@ public class BookingResponse
     public DateTime EndTime { get; set; }
     public string NutritionistName { get; set; } = string.Empty;
     public string ClientName { get; set; } = string.Empty;
+    public string ClientPhone { get; set; } = string.Empty;
+    public string ClientEmail { get; set; } = string.Empty;
     public BookingStatus Status { get; set; }
     public string StatusName { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }

@@ -44,8 +44,9 @@ public class ConsultationsController : ControllerBase
         if (nutritionistId is null)
             return NotFound(new { message = "Профиль нутрициолога не найден" });
 
-        var consultations = await _consultationService
-            .GetNutritionistConsultationsAsync(nutritionistId.Value);
+        var consultations = await _consultationService.GetNutritionistConsultationsAsync(
+            nutritionistId.Value
+        );
         return Ok(consultations);
     }
 
@@ -72,7 +73,10 @@ public class ConsultationsController : ControllerBase
     // PUT api/consultations/{id} — нутрициолог обновляет статус и заметки
     [HttpPut("{id}")]
     [Authorize(Roles = "Nutritionist")]
-    public async Task<IActionResult> UpdateConsultation(Guid id, [FromBody] UpdateConsultationRequest request)
+    public async Task<IActionResult> UpdateConsultation(
+        Guid id,
+        [FromBody] UpdateConsultationRequest request
+    )
     {
         var nutritionistId = await GetCurrentNutritionistIdAsync();
         if (nutritionistId is null)
@@ -80,8 +84,11 @@ public class ConsultationsController : ControllerBase
 
         try
         {
-            var consultation = await _consultationService
-                .UpdateConsultationAsync(id, nutritionistId.Value, request);
+            var consultation = await _consultationService.UpdateConsultationAsync(
+                id,
+                nutritionistId.Value,
+                request
+            );
             return Ok(consultation);
         }
         catch (InvalidOperationException ex)
@@ -100,7 +107,9 @@ public class ConsultationsController : ControllerBase
     private async Task<Guid?> GetCurrentNutritionistIdAsync()
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var nutritionist = await _context.Nutritionists.FirstOrDefaultAsync(n => n.UserId == userId);
+        var nutritionist = await _context.Nutritionists.FirstOrDefaultAsync(n =>
+            n.UserId == userId
+        );
         return nutritionist?.Id;
     }
 }

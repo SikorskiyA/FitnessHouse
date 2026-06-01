@@ -46,7 +46,7 @@ export const NutritionistSchedule = () => {
     })
 
     // Сортировка: Занятые (1) → Свободные (0) → Отменённые (2)
-    // Внутри каждой группы — по времени начала
+    // Внутри каждой группы - по времени начала
     const sortedSlots = useMemo(() => {
         if (!slots) return []
 
@@ -160,7 +160,7 @@ export const NutritionistSchedule = () => {
                                 </div>
                                 <div className="flex items-center gap-2 text-gray-900 font-medium">
                                     <Clock size={16} className="text-emerald-600" />
-                                    <span>{formatTime(slot.startTime)} — {formatTime(slot.endTime)}</span>
+                                    <span>{formatTime(slot.startTime)} - {formatTime(slot.endTime)}</span>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">

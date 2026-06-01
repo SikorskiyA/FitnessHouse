@@ -73,7 +73,7 @@ export const ClientBookings = () => {
                   </div>
                   <div className="flex items-center gap-2 text-gray-600 text-sm">
                     <Clock size={14} />
-                    <span>{formatTime(booking.startTime)} — {formatTime(booking.endTime)}</span>
+                    <span>{formatTime(booking.startTime)} - {formatTime(booking.endTime)}</span>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-3">
