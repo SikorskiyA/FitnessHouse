@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { AuthResponse } from '../types'
+import type { AuthResponse } from '../types'
 
 // Zustand — простое хранилище состояния
 // Хранит данные текущего пользователя и токен

@@ -1,5 +1,5 @@
 import { api } from './client'
-import { ConsultationResponse } from '../types'
+import type { ConsultationResponse } from '../types'
 
 export const consultationsApi = {
   getMy: () => api.get<ConsultationResponse[]>('/consultations/my'),

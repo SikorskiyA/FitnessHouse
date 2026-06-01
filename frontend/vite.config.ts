@@ -12,11 +12,11 @@ export default defineConfig({
     proxy: {
       // Проксируем запросы к API чтобы не было проблем с CORS в dev режиме
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://localhost:5077',
         changeOrigin: true,
       },
       '/hubs': {
-        target: 'http://localhost:5000',
+        target: 'http://localhost:5077',
         changeOrigin: true,
         ws: true, // WebSocket для SignalR
       }
