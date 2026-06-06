@@ -20,7 +20,8 @@ public class AuthController : ControllerBase
     public AuthController(
         UserManager<AppUser> userManager,
         IJwtService jwtService,
-        AppDbContext context)
+        AppDbContext context
+    )
     {
         _userManager = userManager;
         _jwtService = jwtService;
@@ -43,7 +44,7 @@ public class AuthController : ControllerBase
             FirstName = request.FirstName,
             LastName = request.LastName,
             PhoneNumber = request.Phone,
-            EmailConfirmed = true // для будущего подтверждения почты
+            EmailConfirmed = true, // для будущего подтверждения почты
         };
 
         var result = await _userManager.CreateAsync(user, request.Password);
@@ -58,26 +59,24 @@ public class AuthController : ControllerBase
         await _userManager.AddToRoleAsync(user, UserRole.Client);
 
         // Создаём профиль клиента
-        var client = new Client
-        {
-            Id = Guid.NewGuid(),
-            UserId = user.Id
-        };
+        var client = new Client { Id = Guid.NewGuid(), UserId = user.Id };
         _context.Clients.Add(client);
         await _context.SaveChangesAsync();
 
         // Генерируем токен и возвращаем
         var token = _jwtService.GenerateToken(user, UserRole.Client);
 
-        return Ok(new AuthResponse
-        {
-            Token = token,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(60),
-            UserId = user.Id.ToString(),
-            Email = user.Email!,
-            FullName = user.FullName,
-            Role = UserRole.Client
-        });
+        return Ok(
+            new AuthResponse
+            {
+                Token = token,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(60),
+                UserId = user.Id.ToString(),
+                Email = user.Email!,
+                FullName = user.FullName,
+                Role = UserRole.Client,
+            }
+        );
     }
 
     // POST api/auth/login
@@ -100,15 +99,17 @@ public class AuthController : ControllerBase
 
         var token = _jwtService.GenerateToken(user, role);
 
-        return Ok(new AuthResponse
-        {
-            Token = token,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(60),
-            UserId = user.Id.ToString(),
-            Email = user.Email!,
-            FullName = user.FullName,
-            Role = role
-        });
+        return Ok(
+            new AuthResponse
+            {
+                Token = token,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(60),
+                UserId = user.Id.ToString(),
+                Email = user.Email!,
+                FullName = user.FullName,
+                Role = role,
+            }
+        );
     }
 
     // GET api/auth/me — получить данные текущего пользователя
@@ -129,15 +130,17 @@ public class AuthController : ControllerBase
         var roles = await _userManager.GetRolesAsync(user);
         var role = roles.FirstOrDefault() ?? UserRole.Client;
 
-        return Ok(new
-        {
-            userId = user.Id,
-            email = user.Email,
-            fullName = user.FullName,
-            firstName = user.FirstName,
-            lastName = user.LastName,
-            phone = user.PhoneNumber,
-            role
-        });
+        return Ok(
+            new
+            {
+                userId = user.Id,
+                email = user.Email,
+                fullName = user.FullName,
+                firstName = user.FirstName,
+                lastName = user.LastName,
+                phone = user.PhoneNumber,
+                role,
+            }
+        );
     }
 }
