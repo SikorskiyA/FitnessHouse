@@ -6,8 +6,12 @@ import { RegisterPage } from './pages/auth/RegisterPage'
 import { ClientDashboard } from './pages/client/ClientDashboard'
 import { NutritionistDashboard } from './pages/nutritionist/NutritionistDashboard'
 import { AdminDashboard } from './pages/admin/AdminDashboard'
+import { useNotifications } from './hooks/useNotifications'
 
 function App() {
+  
+  useNotifications()
+
   return (
     <Routes>
       {/* Публичные маршруты */}

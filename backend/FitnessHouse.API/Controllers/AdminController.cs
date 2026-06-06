@@ -20,9 +20,7 @@ public class AdminController : ControllerBase
     // GET api/admin/stats
     // GET api/admin/stats?from=2026-01-01&to=2026-01-31
     [HttpGet("stats")]
-    public async Task<IActionResult> GetStats(
-        [FromQuery] DateTime? from,
-        [FromQuery] DateTime? to)
+    public async Task<IActionResult> GetStats([FromQuery] DateTime? from, [FromQuery] DateTime? to)
     {
         if (from.HasValue && to.HasValue && from > to)
             return BadRequest(new { message = "Дата начала не может быть позже даты окончания" });
@@ -48,12 +46,16 @@ public class AdminController : ControllerBase
         if (!result)
             return NotFound(new { message = "Пользователь не найден" });
 
-        return Ok(new { message = isActive ? "Пользователь активирован" : "Пользователь заблокирован" });
+        return Ok(
+            new { message = isActive ? "Пользователь активирован" : "Пользователь заблокирован" }
+        );
     }
 
     // POST api/admin/nutritionists — создать нового нутрициолога
     [HttpPost("nutritionists")]
-    public async Task<IActionResult> CreateNutritionist([FromBody] CreateNutritionistRequest request)
+    public async Task<IActionResult> CreateNutritionist(
+        [FromBody] CreateNutritionistRequest request
+    )
     {
         try
         {

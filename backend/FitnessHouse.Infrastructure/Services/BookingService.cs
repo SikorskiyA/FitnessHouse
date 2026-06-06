@@ -1,5 +1,6 @@
 using FitnessHouse.Application.DTOs.Bookings;
 using FitnessHouse.Application.Interfaces;
+using FitnessHouse.Application.Interfaces;
 using FitnessHouse.Domain.Entities;
 using FitnessHouse.Domain.Enums;
 using FitnessHouse.Infrastructure.Data;
@@ -10,10 +11,12 @@ namespace FitnessHouse.Infrastructure.Services;
 public class BookingService : IBookingService
 {
     private readonly AppDbContext _context;
+    private readonly INotificationService _notificationService;
 
-    public BookingService(AppDbContext context)
+    public BookingService(AppDbContext context, INotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     public async Task<BookingResponse> CreateBookingAsync(
@@ -103,6 +106,19 @@ public class BookingService : IBookingService
                 .Clients.Include(c => c.User)
                 .FirstOrDefaultAsync(c => c.Id == clientId);
 
+            // Отправляем уведомление нутрициологу
+            await _notificationService.SendToUserAsync(
+                slot.Nutritionist.User.Id,
+                "NewBooking",
+                new
+                {
+                    message = $"Новая запись: {client?.User?.FullName} на {slot.StartTime:dd.MM.yyyy HH:mm}",
+                    clientName = client?.User?.FullName,
+                    startTime = slot.StartTime,
+                    bookingId = booking.Id,
+                }
+            );
+
             return MapToResponse(booking, slot, client);
         }
         catch
@@ -149,6 +165,35 @@ public class BookingService : IBookingService
             booking.Consultation.Status = ConsultationStatus.Cancelled;
 
         await _context.SaveChangesAsync();
+
+        // Уведомляем нутрициолога об отмене
+        var nutritionistUser = await _context
+            .Nutritionists.Include(n => n.User)
+            .Where(n => n.Id == booking.Slot.NutritionistId)
+            .Select(n => n.User)
+            .FirstOrDefaultAsync();
+
+        var clientUser = await _context
+            .Clients.Include(c => c.User)
+            .Where(c => c.Id == clientId)
+            .Select(c => c.User)
+            .FirstOrDefaultAsync();
+
+        if (nutritionistUser != null)
+        {
+            await _notificationService.SendToUserAsync(
+                nutritionistUser.Id,
+                "BookingCancelled",
+                new
+                {
+                    message = $"Отмена записи: {clientUser?.FullName} на {booking.Slot.StartTime:dd.MM.yyyy HH:mm}",
+                    clientName = clientUser?.FullName,
+                    startTime = booking.Slot.StartTime,
+                    bookingId = booking.Id,
+                }
+            );
+        }
+
         return true;
     }
 

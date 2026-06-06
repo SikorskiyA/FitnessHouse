@@ -26,38 +26,39 @@ public class AdminService : IAdminService
         var dateTo = to ?? dateFrom.AddMonths(1).AddSeconds(-1);
 
         // Клиенты и нутрициологи — считаем всех зарегистрированных за период
-        var totalClients = await _context.Clients
-            .Include(c => c.User)
+        var totalClients = await _context
+            .Clients.Include(c => c.User)
             .CountAsync(c => c.User.CreatedAt >= dateFrom && c.User.CreatedAt <= dateTo);
 
-        var totalNutritionists = await _context.Nutritionists
-            .Include(n => n.User)
+        var totalNutritionists = await _context
+            .Nutritionists.Include(n => n.User)
             .CountAsync(n => n.User.CreatedAt >= dateFrom && n.User.CreatedAt <= dateTo);
 
         // Записи фильтруем по дате создания
-        var totalBookings = await _context.Bookings
-            .CountAsync(b => b.CreatedAt >= dateFrom && b.CreatedAt <= dateTo);
+        var totalBookings = await _context.Bookings.CountAsync(b =>
+            b.CreatedAt >= dateFrom && b.CreatedAt <= dateTo
+        );
 
-        var activeBookings = await _context.Bookings
-            .CountAsync(b => b.Status == BookingStatus.Confirmed
-                        && b.CreatedAt >= dateFrom
-                        && b.CreatedAt <= dateTo);
+        var activeBookings = await _context.Bookings.CountAsync(b =>
+            b.Status == BookingStatus.Confirmed && b.CreatedAt >= dateFrom && b.CreatedAt <= dateTo
+        );
 
-        var completedConsultations = await _context.Consultations
-            .CountAsync(c => c.Status == ConsultationStatus.Completed
-                        && c.CompletedAt >= dateFrom
-                        && c.CompletedAt <= dateTo);
+        var completedConsultations = await _context.Consultations.CountAsync(c =>
+            c.Status == ConsultationStatus.Completed
+            && c.CompletedAt >= dateFrom
+            && c.CompletedAt <= dateTo
+        );
 
-        var cancelledBookings = await _context.Bookings
-            .CountAsync(b => b.Status == BookingStatus.Cancelled
-                        && b.CancelledAt >= dateFrom
-                        && b.CancelledAt <= dateTo);
+        var cancelledBookings = await _context.Bookings.CountAsync(b =>
+            b.Status == BookingStatus.Cancelled
+            && b.CancelledAt >= dateFrom
+            && b.CancelledAt <= dateTo
+        );
 
         // Свободные слоты — показываем те что попадают в период
-        var availableSlots = await _context.Slots
-            .CountAsync(s => s.Status == SlotStatus.Available
-                        && s.StartTime >= dateFrom
-                        && s.StartTime <= dateTo);
+        var availableSlots = await _context.Slots.CountAsync(s =>
+            s.Status == SlotStatus.Available && s.StartTime >= dateFrom && s.StartTime <= dateTo
+        );
 
         return new StatsResponse
         {
@@ -69,9 +70,9 @@ public class AdminService : IAdminService
             CancelledBookings = cancelledBookings,
             AvailableSlots = availableSlots,
             PeriodFrom = dateFrom,
-            PeriodTo = dateTo
+            PeriodTo = dateTo,
         };
-    }   
+    }
 
     public async Task<IEnumerable<UserListResponse>> GetUsersAsync(string? role = null)
     {
@@ -88,16 +89,18 @@ public class AdminService : IAdminService
             if (role is not null && userRole != role)
                 continue;
 
-            result.Add(new UserListResponse
-            {
-                Id = user.Id,
-                FullName = user.FullName,
-                Email = user.Email ?? string.Empty,
-                Phone = user.PhoneNumber ?? string.Empty,
-                Role = userRole,
-                IsActive = user.IsActive,
-                CreatedAt = user.CreatedAt
-            });
+            result.Add(
+                new UserListResponse
+                {
+                    Id = user.Id,
+                    FullName = user.FullName,
+                    Email = user.Email ?? string.Empty,
+                    Phone = user.PhoneNumber ?? string.Empty,
+                    Role = userRole,
+                    IsActive = user.IsActive,
+                    CreatedAt = user.CreatedAt,
+                }
+            );
         }
 
         return result.OrderBy(u => u.FullName);
@@ -126,7 +129,7 @@ public class AdminService : IAdminService
             FirstName = request.FirstName,
             LastName = request.LastName,
             PhoneNumber = request.Phone,
-            EmailConfirmed = true
+            EmailConfirmed = true,
         };
 
         var result = await _userManager.CreateAsync(user, request.Password);
@@ -143,7 +146,7 @@ public class AdminService : IAdminService
             Id = Guid.NewGuid(),
             UserId = user.Id,
             Specialization = request.Specialization,
-            Bio = request.Bio
+            Bio = request.Bio,
         };
 
         _context.Nutritionists.Add(nutritionist);
@@ -157,7 +160,7 @@ public class AdminService : IAdminService
             Phone = user.PhoneNumber ?? string.Empty,
             Role = UserRole.Nutritionist,
             IsActive = user.IsActive,
-            CreatedAt = user.CreatedAt
+            CreatedAt = user.CreatedAt,
         };
     }
 }

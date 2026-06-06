@@ -50,8 +50,8 @@ public class SlotCleanupService : BackgroundService
             var now = DateTime.UtcNow;
 
             // Находим все свободные слоты у которых время окончания уже прошло
-            var expiredSlots = await context.Slots
-                .Where(s => s.Status == SlotStatus.Available && s.EndTime < now)
+            var expiredSlots = await context
+                .Slots.Where(s => s.Status == SlotStatus.Available && s.EndTime < now)
                 .ToListAsync();
 
             if (expiredSlots.Count == 0)
@@ -66,8 +66,7 @@ public class SlotCleanupService : BackgroundService
 
             await context.SaveChangesAsync();
 
-            _logger.LogInformation(
-                "Очищено просроченных слотов: {Count}", expiredSlots.Count);
+            _logger.LogInformation("Очищено просроченных слотов: {Count}", expiredSlots.Count);
         }
         catch (Exception ex)
         {
